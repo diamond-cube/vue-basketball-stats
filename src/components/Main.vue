@@ -4,7 +4,7 @@
     <br />
     <div class="container">
       <select
-        class="form-select container w-25"
+        class="form-select container w-25 px-3 py-1 shadow-sm"
         @change="loadData()"
         v-model="selectedValue"
       >
@@ -44,11 +44,37 @@
           </tr>
         </tbody>
       </table>
-      <table v-else-if="selectedValue == 2">
-        <tr></tr>
-        <tr></tr>
+      <table
+        class="table table-hover table-bordered table-sm"
+        v-else-if="selectedValue == 2"
+      >
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Conference</th>
+            <th>Info</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="t in listOfTeams" :key="t.id">
+            <td>{{ t.id }}</td>
+            <td>{{ t.full_name }}</td>
+            <td>{{ t.conference }}</td>
+            <td>
+              <button
+                data-bs-toggle="modal"
+                data-bs-target="#teamModal"
+                @click="loadTeamInfo(t)"
+                class="btn btn-outline-dark btn-sm"
+              >
+                <i class="bi bi-info-lg" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
       </table>
-      <div v-if="selectedValue > 0" class="page mb-3">
+      <div v-if="selectedValue > 0 && selectedValue < 2" class="page mb-3">
         <button
           class="btn btn-outline-dark"
           @click="prevPage()"
@@ -70,15 +96,13 @@
       class="modal fade"
       id="playerModal"
       tabindex="-1"
-      aria-labelledby="exampleModalLabel"
+      aria-labelledby="modalLabel"
       aria-hidden="true"
     >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Player Details
-            </h1>
+            <h1 class="modal-title fs-5" id="modalLabel">Player Details</h1>
             <button
               type="button"
               class="btn-close"
@@ -87,12 +111,49 @@
             ></button>
           </div>
           <div class="modal-body">
-            <h2>{{ playerName }}</h2>
+            <h2>{{ playerName }} ({{ playerPosition }})</h2>
+            <h6>{{ playerTeam }}</h6>
           </div>
           <div class="modal-footer">
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-outline-dark"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="teamModal"
+      tabindex="-1"
+      aria-labelledby="modalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalLabel">Team Details</h1>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <h2>{{ teamName }}</h2>
+            <h5>{{ teamCity }}</h5>
+            <h6>{{ teamConference }}</h6>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-dark"
               data-bs-dismiss="modal"
             >
               Close
@@ -107,24 +168,27 @@
 <script>
 import { ref } from "vue";
 import Axios from "axios";
-import Swal from "sweetalert2";
 
 export default {
   name: "Main",
   setup() {
     const playerUrl = "https://www.balldontlie.io/api/v1/players/";
-    const teamUrl = "https://www.balldontlie.io/api/v1/teams";
+    const teamUrl = "https://www.balldontlie.io/api/v1/teams/";
 
     let selectedValue = ref(0);
     let pageNum = ref(1);
 
-    let listOfPlayers = ref();
+    let listOfPlayers = ref([]);
     let playerID = ref("");
     let playerName = ref("");
     let playerTeam = ref("");
     let playerPosition = ref("");
 
-    let listOfTeams = ref();
+    let listOfTeams = ref([]);
+    let teamID = ref();
+    let teamName = ref("");
+    let teamConference = ref("");
+    let teamCity = ref("");
 
     function loadData() {
       if (selectedValue.value == 1) {
@@ -134,7 +198,8 @@ export default {
         });
       } else if (selectedValue.value == 2) {
         Axios.get(teamUrl).then((res) => {
-          console.log(res);
+          console.log(res.data.data);
+          listOfTeams.value = res.data.data;
         });
       } else if (selectedValue.value == 0) {
         listOfPlayers.value = [];
@@ -163,6 +228,17 @@ export default {
         playerName.value = p.first_name + " " + p.last_name;
         playerID.value = p.id;
         playerTeam.value = p.team.full_name;
+        playerPosition.value = p.position;
+      });
+    }
+
+    function loadTeamInfo(t) {
+      Axios.get(teamUrl + t.id).then((res) => {
+        console.log(res);
+        teamID.value = t.id;
+        teamName.value = t.full_name;
+        teamCity.value = t.city;
+        teamConference.value = t.conference;
       });
     }
     return {
@@ -170,6 +246,7 @@ export default {
       nextPage,
       prevPage,
       loadPlayerInfo,
+      loadTeamInfo,
       selectedValue,
       listOfPlayers,
       playerID,
@@ -178,6 +255,10 @@ export default {
       playerTeam,
       playerUrl,
       listOfTeams,
+      teamID,
+      teamCity,
+      teamName,
+      teamConference,
       pageNum,
     };
   },
