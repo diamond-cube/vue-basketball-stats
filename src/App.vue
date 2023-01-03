@@ -2,14 +2,8 @@
   <Main />
 </template>
 
-<script>
+<script setup>
 import Main from "./components/Main.vue";
-export default {
-  name: "App",
-  components: {
-    Main,
-  },
-};
 </script>
 
 <style>

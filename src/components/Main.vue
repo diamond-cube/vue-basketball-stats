@@ -165,104 +165,79 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import Axios from "axios";
 
-export default {
-  name: "Main",
-  setup() {
-    const playerUrl = "https://www.balldontlie.io/api/v1/players/";
-    const teamUrl = "https://www.balldontlie.io/api/v1/teams/";
+const playerUrl = "https://www.balldontlie.io/api/v1/players/";
+const teamUrl = "https://www.balldontlie.io/api/v1/teams/";
 
-    let selectedValue = ref(0);
-    let pageNum = ref(1);
+let selectedValue = ref(0);
+let pageNum = ref(1);
 
-    let listOfPlayers = ref([]);
-    let playerID = ref("");
-    let playerName = ref("");
-    let playerTeam = ref("");
-    let playerPosition = ref("");
+let listOfPlayers = ref([]);
+let playerID = ref("");
+let playerName = ref("");
+let playerTeam = ref("");
+let playerPosition = ref("");
 
-    let listOfTeams = ref([]);
-    let teamID = ref();
-    let teamName = ref("");
-    let teamConference = ref("");
-    let teamCity = ref("");
+let listOfTeams = ref([]);
+let teamID = ref();
+let teamName = ref("");
+let teamConference = ref("");
+let teamCity = ref("");
 
-    function loadData() {
-      if (selectedValue.value == 1) {
-        Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
-          console.log(res.data.data);
-          listOfPlayers.value = res.data.data;
-        });
-      } else if (selectedValue.value == 2) {
-        Axios.get(teamUrl).then((res) => {
-          console.log(res.data.data);
-          listOfTeams.value = res.data.data;
-        });
-      } else if (selectedValue.value == 0) {
-        listOfPlayers.value = [];
-        pageNum.value = 1;
-      }
-    }
+function loadData() {
+  if (selectedValue.value == 1) {
+    Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
+      console.log(res.data.data);
+      listOfPlayers.value = res.data.data;
+    });
+  } else if (selectedValue.value == 2) {
+    Axios.get(teamUrl).then((res) => {
+      console.log(res.data.data);
+      listOfTeams.value = res.data.data;
+    });
+  } else if (selectedValue.value == 0) {
+    listOfPlayers.value = [];
+    pageNum.value = 1;
+  }
+}
 
-    function nextPage() {
-      pageNum.value += 1;
+function nextPage() {
+  pageNum.value += 1;
 
-      Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
-        listOfPlayers.value = res.data.data;
-      });
-    }
+  Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
+    listOfPlayers.value = res.data.data;
+  });
+}
 
-    function prevPage() {
-      pageNum.value -= 1;
-      Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
-        listOfPlayers.value = res.data.data;
-      });
-    }
+function prevPage() {
+  pageNum.value -= 1;
+  Axios.get(playerUrl + "?page=" + pageNum.value).then((res) => {
+    listOfPlayers.value = res.data.data;
+  });
+}
 
-    function loadPlayerInfo(p) {
-      Axios.get(playerUrl + p.id).then((res) => {
-        console.log(res);
-        playerName.value = p.first_name + " " + p.last_name;
-        playerID.value = p.id;
-        playerTeam.value = p.team.full_name;
-        playerPosition.value = p.position;
-      });
-    }
+function loadPlayerInfo(p) {
+  Axios.get(playerUrl + p.id).then((res) => {
+    console.log(res);
+    playerName.value = p.first_name + " " + p.last_name;
+    playerID.value = p.id;
+    playerTeam.value = p.team.full_name;
+    playerPosition.value = p.position;
+  });
+}
 
-    function loadTeamInfo(t) {
-      Axios.get(teamUrl + t.id).then((res) => {
-        console.log(res);
-        teamID.value = t.id;
-        teamName.value = t.full_name;
-        teamCity.value = t.city;
-        teamConference.value = t.conference;
-      });
-    }
-    return {
-      loadData,
-      nextPage,
-      prevPage,
-      loadPlayerInfo,
-      loadTeamInfo,
-      selectedValue,
-      listOfPlayers,
-      playerID,
-      playerName,
-      playerPosition,
-      playerTeam,
-      playerUrl,
-      listOfTeams,
-      teamID,
-      teamCity,
-      teamName,
-      teamConference,
-      pageNum,
-    };
-  },
-};
+function loadTeamInfo(t) {
+  Axios.get(teamUrl + t.id).then((res) => {
+    console.log(res);
+    teamID.value = t.id;
+    teamName.value = t.full_name;
+    teamCity.value = t.city;
+    teamConference.value = t.conference;
+  });
+}
 </script>
 
 <style>
